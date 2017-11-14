@@ -15,7 +15,7 @@ defmodule Worker do
     
             loop()
         else
-			Client.request_work
+	    Client.request_work
         end
     end
 
@@ -23,27 +23,27 @@ defmodule Worker do
         receive do
             {:started, update, length, k} ->
                 :timer.sleep 1
-				start(update, length, k)
+		start(update, length, k)
             {:collision, s, h} ->
-				IO.puts s<>"    "<>h
-				loop()
+		IO.puts s<>"    "<>h
+		loop()
 	    end
     end
 
     def compute do
-		receive do
-			{:contract, head, counter, length, k} ->
-				send(head, {:started, counter + @work_unit, length - @work_unit, k})
+	receive do
+	    {:contract, head, counter, length, k} ->
+	        send(head, {:started, counter + @work_unit, length - @work_unit, k})
 				
-				Enum.each(counter..counter + @work_unit, fn x ->
+		Enum.each(counter..counter + @work_unit, fn x ->
                     s = @gatorid <> Integer.to_string(x)
-					h = :crypto.hash(:sha256, s) |> Base.encode16
+		    h = :crypto.hash(:sha256, s) |> Base.encode16
 
                     if Util.check_hash(h, k) do
-						send(head, {:collision, s, h})
-					end
-				end)
+			send(head, {:collision, s, h})
+		    end
+		end)
 
-		end
+        end
     end
 end
